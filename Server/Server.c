@@ -202,8 +202,7 @@ static void *manageClient(void *client_sd) {
     if(getSizeTreeByRoom(user.room) < ROOM_CAPACITY){
         insert_Tree(user, pthread_self());
     } else {
-        int res = manageEnqueue(user);
-        if(res == 1){
+        if(!manageEnqueue(user)){
             printf("[%s] Queue full, close client...\n", user.nickname);
             sendMsg("Queue full, try later...", sd);
             close(sd);

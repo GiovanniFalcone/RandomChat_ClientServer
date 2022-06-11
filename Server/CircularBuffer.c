@@ -26,15 +26,14 @@ bool searchqueue(Queue *q, char *nickname, struct T_user queue[]){
 	           return true;
 		    }		
         }	
-	}  
+    }  
 
 	return false;
- }
+}
 
-
-struct T_user enqueue(Queue *q, struct T_user user, struct T_user queue[]){
+bool enqueue(Queue *q, struct T_user user, struct T_user queue[]){
     if((q -> rear + 1) % QUEUE_SIZE == q -> front) {      // If circular queue is full
-        printf("overflow error\n");
+        return false;
     } else {
         if(q -> front == - 1)                             // If circular queue is empty
             q -> front = 0;
@@ -42,15 +41,8 @@ struct T_user enqueue(Queue *q, struct T_user user, struct T_user queue[]){
         strcpy(queue[q -> rear].nickname, user.nickname);
         queue[q -> rear].room = user.room;
         queue[q -> rear].user_sd = user.user_sd;
-        return queue[q -> rear];
+        return true;;
     }
-}
-
-int getQueueSize(Queue *q){
-    if(q -> rear == -1) return 0;                                               // empty
-    else if((q -> rear + 1) % QUEUE_SIZE == q -> front) return QUEUE_SIZE;      // full
-    else if(q -> rear == 0 && q -> front != 0) return q -> front;               // if dequeued
-    else return q -> rear + 1;                                                  // other cases
 }
 
 struct T_user dequeue(Queue *q, struct T_user queue[]){

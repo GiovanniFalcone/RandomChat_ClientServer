@@ -18,7 +18,6 @@ typedef struct queue Queue;
 #include "AVL.h"
 #include <stdbool.h>
 
-int size_1, size_2, size_3, size_4;          // Current size of each circular buffer
 struct T_user queue_room_1[QUEUE_SIZE];      // User who waiting to enter in room 1
 struct T_user queue_room_2[QUEUE_SIZE];      // User who waiting to enter in room 2
 struct T_user queue_room_3[QUEUE_SIZE];      // User who waiting to enter in room 3
@@ -38,9 +37,10 @@ Queue *init(Queue *q);
  * @param q the queue struct with indexes for the correct array
  * @param user the user who has to enqueue
  * @param queue the room where user have to wait
- * @return struct T_user 
+ * 
+ * @return false if overflow, true otherwise
  */
-struct T_user enqueue(Queue *q, struct T_user user, struct T_user queue[]);
+bool enqueue(Queue *q, struct T_user user, struct T_user queue[]);
 
 /**
  * @brief dequeue the user from waiting queue
@@ -63,7 +63,5 @@ struct T_user dequeue(Queue *q, struct T_user queue[]);
 bool searchqueue(Queue *q, char *nickname, struct T_user queue[]);
 
 void print(Queue *q, struct T_user *);
-
-int getQueueSize(Queue *q);
 
 #endif //NEW_SERVER_CIRCULARBUFFER_H

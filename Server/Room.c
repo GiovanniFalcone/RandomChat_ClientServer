@@ -142,37 +142,13 @@ int manageEnqueue(struct T_user user){
     int queue_old_size;
 
     switch(user.room){
-        case '1':
-            queue_old_size = size_1;
-            queue_room_1[size_1] = enqueue(queue1, user, queue_room_1);
-            if(queue_old_size == getQueueSize(queue1))
-                return 1;
-            size_1 ++;
-            return 0;
+        case '1': return enqueue(queue1, user, queue_room_1);
+            
+        case '2': return enqueue(queue2, user, queue_room_2);
+            
+        case '3': return enqueue(queue3, user, queue_room_3);
 
-        case '2':
-            queue_old_size = size_2;
-            queue_room_2[size_2] = enqueue(queue2, user, queue_room_2);
-            if(queue_old_size == getQueueSize(queue2))
-                return 1;
-            size_2 ++;
-            return 0;
-
-        case '3':
-            queue_old_size = size_3;
-            queue_room_3[size_3] = enqueue(queue3, user, queue_room_3);
-            if(queue_old_size == getQueueSize(queue3))
-                return 1;
-            size_3 ++;
-            return 0;
-
-        case '4':
-            queue_old_size = size_4;
-            queue_room_4[size_4] = enqueue(queue4, user, queue_room_4);
-            if(queue_old_size == getQueueSize(queue4))
-                return 1;
-            size_4 ++;
-            return 0;  
+        case '4': return enqueue(queue4, user, queue_room_4);
     }
 }
 
