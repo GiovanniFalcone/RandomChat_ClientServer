@@ -111,9 +111,9 @@ void  printTreeByRoom(char room);
  * 
  * @param user 
  * 
- * @return 1 in case of overflow, 0 otherwise
+ * @return false in case of overflow, true otherwise
  */
-int manageEnqueue(struct T_user user);
+bool manageEnqueue(struct T_user user);
 
 /**
  * @brief dequeue the user who wainting from the correct queue
