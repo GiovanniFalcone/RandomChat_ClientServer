@@ -158,22 +158,18 @@ struct T_user manageDequeue(char room){
     switch(room){
         case '1':
             extracted = dequeue(queue1, queue_room_1);
-            size_1 --;
             return extracted;
 
         case '2':
             extracted = dequeue(queue2, queue_room_2);
-            size_2 --;
             return extracted;
 
         case '3':
             extracted = dequeue(queue3, queue_room_3);
-            size_3 --;
             return extracted;
 
         case '4':
             extracted = dequeue(queue4, queue_room_4);
-            size_4 --;
             return extracted; 
     }
 }
@@ -189,10 +185,10 @@ struct T_user manageDequeue(char room){
 void numberUsers(int sd)
 {
     printf("Received @user\n");
-    int  user1 = getSizeTreeByRoom('1') + size_1;           
-	int  user2 = getSizeTreeByRoom('2') + size_2;
-    int  user3 = getSizeTreeByRoom('3') + size_3;
-    int  user4 = getSizeTreeByRoom('4') + size_4;
+    int  user1 = getSizeTreeByRoom('1') + getQueueSize(queue1);           
+	int  user2 = getSizeTreeByRoom('2') + getQueueSize(queue2);
+    int  user3 = getSizeTreeByRoom('3') + getQueueSize(queue3);
+    int  user4 = getSizeTreeByRoom('4') + getQueueSize(queue4);
 
     char utenti1[62];
 	char utenti2[62];
@@ -201,10 +197,10 @@ void numberUsers(int sd)
     char msg[248];
 
     memset(msg,'\0', 248);
-    sprintf(utenti1, "\nLa stanza tematica 1 contiene %d utenti di cui %d in coda;\n", user1, size_1);
-    sprintf(utenti2, "La stanza tematica 2 contiene %d utenti di cui %d in coda;\n", user2, size_2);
-    sprintf(utenti3, "La stanza tematica 3 contiene %d utenti di cui %d in coda;\n", user3, size_3);
-    sprintf(utenti4, "La stanza tematica 4 contiene %d utenti di cui %d in coda;\n", user4, size_4);
+    sprintf(utenti1, "\nLa stanza tematica 1 contiene %d utenti di cui %d in coda;\n", user1, getQueueSize(queue1));
+    sprintf(utenti2, "La stanza tematica 2 contiene %d utenti di cui %d in coda;\n", user2, getQueueSize(queue2));
+    sprintf(utenti3, "La stanza tematica 3 contiene %d utenti di cui %d in coda;\n", user3, getQueueSize(queue2));
+    sprintf(utenti4, "La stanza tematica 4 contiene %d utenti di cui %d in coda;\n", user4, getQueueSize(queue3));
     
     strcpy(msg, utenti1);
     strcat(msg, utenti2);

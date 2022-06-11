@@ -76,3 +76,11 @@ void print(Queue *q, struct T_user *queue){
         printf("%s\n", queue[i].nickname);
     } else printf("empty.\n");
 }
+
+int getQueueSize(Queue *q){
+    if(q -> rear == -1) return 0;                                               // if empty
+    else if((q -> rear + 1) % QUEUE_SIZE == q -> front) return QUEUE_SIZE;      // if full
+    else if(q -> rear == 0 && q -> front != 0) return q -> front;               // after dequeue
+    else if(q -> rear != 0 && q -> front != 0) return q -> rear;
+    else return q -> rear + 1;                                                  // other cases
+}

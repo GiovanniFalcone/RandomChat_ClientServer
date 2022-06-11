@@ -64,4 +64,6 @@ bool searchqueue(Queue *q, char *nickname, struct T_user queue[]);
 
 void print(Queue *q, struct T_user *);
 
+int getQueueSize(Queue *q);
+
 #endif //NEW_SERVER_CIRCULARBUFFER_H
