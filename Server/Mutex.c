@@ -83,17 +83,17 @@ int  cond_wait (char tipocond, char r)
 
   else if (tipocond=='C')
         switch(r)  {
-        case '1' :  return pthread_cond_wait(&chat_cond1, &mutex1);
-        case '2' :  return pthread_cond_wait(&chat_cond2, &mutex2);
-        case '3' :  return pthread_cond_wait(&chat_cond3, &mutex3);
-        case '4' :  return pthread_cond_wait(&chat_cond4, &mutex4);
+        case '1' :  return pthread_cond_wait(&chat_cond1, &chat_mutex_1);
+        case '2' :  return pthread_cond_wait(&chat_cond2, &chat_mutex_2);
+        case '3' :  return pthread_cond_wait(&chat_cond3, &chat_mutex_3);
+        case '4' :  return pthread_cond_wait(&chat_cond4, &chat_mutex_4);
         }
   else if (tipocond=='S')
         switch(r) {
-        case '1' :  return pthread_cond_wait(&chat_cond2_1, &mutex1);
-        case '2' :  return pthread_cond_wait(&chat_cond2_2, &mutex2);
-        case '3' :  return pthread_cond_wait(&chat_cond2_3, &mutex3);
-        case '4' :  return pthread_cond_wait(&chat_cond2_4, &mutex4);
+        case '1' :  return pthread_cond_wait(&chat_cond2_1, &chat_mutex2_1);
+        case '2' :  return pthread_cond_wait(&chat_cond2_2, &chat_mutex2_2);
+        case '3' :  return pthread_cond_wait(&chat_cond2_3, &chat_mutex2_3);
+        case '4' :  return pthread_cond_wait(&chat_cond2_4, &chat_mutex2_4);
      }
  }
 

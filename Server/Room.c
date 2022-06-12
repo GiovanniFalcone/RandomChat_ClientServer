@@ -138,9 +138,8 @@ void printTreeByRoom(char room)
 /*                      QUEUE FUNCTIONS
 /* ******************************************************* */
 
-int manageEnqueue(struct T_user user){
-    int queue_old_size;
-
+bool  manageEnqueue(struct T_user user){
+   
     switch(user.room){
         case '1': return enqueue(queue1, user, queue_room_1);
             
@@ -413,8 +412,12 @@ int people_ChattingFunc(char r, int inc)
 bool clientRecalculation(int r, Tree* first, Tree* second){
     mutex_lock('M', r);
 
-    if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) < 2) return true;
+    if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) < 2) {
+        mutex_unlock('M', r);
+        return true;
+    }
 
+    mutex_lock('M', r);
     if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) == 2){
     mutex_unlock('M', r);
     

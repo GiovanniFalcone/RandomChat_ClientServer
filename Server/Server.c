@@ -203,6 +203,7 @@ static void *manageClient(void *client_sd) {
         insert_Tree(user, pthread_self());
     } else {
         if(!manageEnqueue(user)){
+            mutex_unlock('M', user.room);
             printf("[%s] Queue full, close client...\n", user.nickname);
             sendMsg("Queue full, try later...", sd);
             close(sd);
@@ -309,7 +310,10 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
         if(t_kill != 0) pthread_kill(tid, SIGUSR1);
 
         // if user has write @exit while they were waiting then return them in order to delete their node from tree
-        if(firstUser -> key.exit == 1) return firstUser -> key;
+        if(firstUser -> key.exit == 1){
+            mutex_unlock('C', room);
+            return firstUser -> key;
+        }
 
         printf("\n[%s] Possibile chat?\n", firstUser -> key.nickname);
 
@@ -347,13 +351,16 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
             }
             
             printf("[%s] wait for second user \n", firstUser -> key.nickname);
-            cond_wait('S',room);
+            cond_wait('S', room);
 
             // send signal to thread who handle the @exit in order to close it
             if(t_kill != 0) pthread_kill(tid, SIGUSR1);
         
             // check if the user, during the waiting, has write @exit
-            if(firstUser -> key.exit == 1)  return firstUser -> key;
+            if(firstUser -> key.exit == 1){
+                mutex_unlock('S', room);
+                return firstUser -> key;
+            }
 
             printf("[%s] possible chat \n", firstUser -> key.nickname);
         }
@@ -529,6 +536,7 @@ static struct T_user manage_chat(Tree *from_Client, Tree *to_Client){
         to_Client -> key.state = 'W';
         to_Client -> key.exit = 0;
         to_Client -> key.stop = 0;
+        printf("stop\n");
     } else  if(strcmp(read_buffer, "@stop") == 0) {
         from_Client -> key.state = 'W';
         from_Client -> key.stop = 1;

@@ -188,6 +188,8 @@ static Tree *delete_root(Tree *tree){
             tree -> key.room = tmp -> key.room;
             tree -> key.user_sd = tmp -> key.user_sd;
             tree -> key.state = tmp -> key.state;
+            tree -> key.stop = tmp -> key.stop;
+            tree -> key.exit = tmp -> key.exit;
             tree = balanceLeft(tree);
             free(tmp);
         }
