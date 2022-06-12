@@ -536,7 +536,6 @@ static struct T_user manage_chat(Tree *from_Client, Tree *to_Client){
         to_Client -> key.state = 'W';
         to_Client -> key.exit = 0;
         to_Client -> key.stop = 0;
-        printf("stop\n");
     } else  if(strcmp(read_buffer, "@stop") == 0) {
         from_Client -> key.state = 'W';
         from_Client -> key.stop = 1;
