@@ -10,23 +10,23 @@
 #include "AVL.h"
 #include "CircularBuffer.h"
 
-char OPZIONE_LOCK = 'T';  // T PER TRYLOCK  ;   DIVERSO DA T PER LOCK ESCLUSIVO
+char OPZIONE_LOCK = 'T';  // per eventuale trylock
 int ROOM_CAPACITY;
 
-pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex3 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex4 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex1 ;
+pthread_mutex_t mutex2 ;
+pthread_mutex_t mutex3 ;
+pthread_mutex_t mutex4 ;
 
-pthread_mutex_t chat_mutex_1 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex_2 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex_3 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex_4 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t chat_mutex_1 ;
+pthread_mutex_t chat_mutex_2 ;
+pthread_mutex_t chat_mutex_3 ;
+pthread_mutex_t chat_mutex_4 ;
 
-pthread_mutex_t chat_mutex2_1 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex2_2 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex2_3 = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t chat_mutex2_4 = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t chat_mutex2_1 ;
+pthread_mutex_t chat_mutex2_2 ;
+pthread_mutex_t chat_mutex2_3 ;
+pthread_mutex_t chat_mutex2_4 ;
 
 pthread_cond_t q_cond1 = PTHREAD_COND_INITIALIZER;
 pthread_cond_t q_cond2 = PTHREAD_COND_INITIALIZER;

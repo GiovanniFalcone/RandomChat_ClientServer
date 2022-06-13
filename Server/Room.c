@@ -410,17 +410,19 @@ int people_ChattingFunc(char r, int inc)
 } 
 
 bool clientRecalculation(int r, Tree* first, Tree* second){
-    mutex_lock('M', r);
 
+    mutex_lock('M', r);
     if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) < 2) {
         mutex_unlock('M', r);
         return true;
     }
-
-    mutex_lock('M', r);
-    if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) == 2){
     mutex_unlock('M', r);
     
+    mutex_lock('M', r);
+    if(getSizeTreeByRoom(r) - people_ChattingFunc(r, 0) == 2){
+        mutex_unlock('M', r);
+        
+        
         if(strcmp(first->key.nickname, second -> key.nickname)==0)   
             return false;
 
@@ -434,6 +436,9 @@ bool clientRecalculation(int r, Tree* first, Tree* second){
             return true;
         }
     }
+    mutex_unlock('M', r);
+      
+
     return false;
 }
 

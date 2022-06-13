@@ -67,7 +67,7 @@ static void *exitUser(void *firstUser);
  * @param second_User_Node second user node selected randomly
  * @return nickname of user who write "exit" into the chat, NULL otherwise
  */
-static struct T_user init_chat(Tree *first_User_Node, Tree *second_User_Node);
+static struct T_user init_chat(struct T_user first_User_Node, struct T_user second_User_Node);
 
 /**
  * This function manage the chat between two client using send and receive functions.
@@ -75,7 +75,7 @@ static struct T_user init_chat(Tree *first_User_Node, Tree *second_User_Node);
  * @param to_Client the user who will have to read what the first one wrote
  * @return
  */
-static struct T_user manage_chat(Tree *from_Client, Tree *to_Client);
+static struct T_user manage_chat(struct T_user from_Client, struct T_user to_Client);
 
 /**
  * This function creates a random chat by selecting random nodes from the tree.
@@ -150,6 +150,78 @@ int main() {
             fprintf(stderr, "thread create: %s\n", strerror(err));
             exit(EXIT_FAILURE);
     }
+    
+    pthread_mutexattr_t attr1;
+	
+    if((err = pthread_mutexattr_init(&attr1)) != 0 ){
+        fprintf(stderr, "pthread_mutexattr_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutexattr_settype(&attr1, PTHREAD_MUTEX_RECURSIVE)) != 0){
+        fprintf(stderr, "pthread_mutexattr_settype: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    if((err = pthread_mutex_init(&mutex1, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    if((err = pthread_mutex_init(&chat_mutex_1, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&chat_mutex2_1, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&mutex2, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    if((err = pthread_mutex_init(&chat_mutex_2, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&chat_mutex2_2, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&mutex3, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    if((err = pthread_mutex_init(&chat_mutex_3, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&chat_mutex2_3, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&mutex4, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+    
+    if((err = pthread_mutex_init(&chat_mutex_4, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
+
+    if((err = pthread_mutex_init(&chat_mutex2_4, &attr1)) != 0){
+        fprintf(stderr, "pthread_mutex_init: %s\n", strerror(err));
+        exit(EXIT_FAILURE);
+    }
 
     while(1){
         client_len = sizeof(client_addr);
@@ -189,6 +261,7 @@ static void *manageClient(void *client_sd) {
 
     user = getUserClt(sd);
     user.user_sd = sd;
+    user.state = 'W';
 
     printf("User %s for room number %c\n", user.nickname, user.room);
     if(user.room == '5'){
@@ -197,7 +270,7 @@ static void *manageClient(void *client_sd) {
         free((int*)client_sd);
         pthread_exit(0);
     }
-
+    
     mutex_lock('M', user.room);
     if(getSizeTreeByRoom(user.room) < ROOM_CAPACITY){
         insert_Tree(user, pthread_self());
@@ -220,9 +293,8 @@ static void *manageClient(void *client_sd) {
         insert_Tree(user, pthread_self());
     }    
     cond_broadcast('C', user.room); 
-    cond_broadcast('S', user.room);
     mutex_unlock('M', user.room);
-
+    
     struct T_user tmp_user;
           
     while(1){
@@ -233,11 +305,12 @@ static void *manageClient(void *client_sd) {
             fflush(stdout);
 
             // delete the user from the tree and wake up who were waiting in queue
-            mutex_lock('M', tmp_user.room);
+            printf("[%d] rimuovo\n", sd);
+            mutex_lock('M', user.room);
             deletefromTree(tmp_user.room, tmp_user.nickname);
             cond_broadcast('Q', tmp_user.room);
             mutex_unlock('M', tmp_user.room);
-
+            
             close(tmp_user.user_sd);
 
             // if the sd is equal to the sd of the user who has write "@exit" then break and exit from current thread
@@ -273,18 +346,19 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
     pthread_t tid;
     Tree *firstUser = NULL, *secondUser = NULL;
     struct T_user user;
-    int err, people_condition, t_kill = 0;
+    int err, people_condition, t_kill = 0, sem;
+    char tmp_nick_1[NICKNAME_SIZE], tmp_nick_2[NICKNAME_SIZE];
     
-    printf("\nCreate chat in room %c\n", room);
+    printf("\n[%s] Create chat in room %c\n", nickname_current_user, room);
     
     mutex_lock('C', room);
     firstUser = search_Tree(room, nickname_current_user);
-    printf("[%s] First client data: sd: %d room: %c, state: %c\n", firstUser -> key.nickname, firstUser -> key.user_sd,
-           firstUser -> key.room, firstUser -> key.state);
+    printf("[%s] First client data: sd: %d room: %c, state: %c, stop: %d, exit: %d\n", firstUser -> key.nickname, firstUser -> key.user_sd,
+           firstUser -> key.room, firstUser -> key.state, firstUser -> key.stop, firstUser -> key.exit);
            
-    mutex_lock('M', room);       
+    mutex_lock('M', room);
     people_condition = getSizeTreeByRoom(room) - people_ChattingFunc(room, 0); 
-    mutex_unlock('M', room);     
+    mutex_unlock('M', room);
     
     while(people_condition < 2 || firstUser -> key.state == 'T'){
         // create a thread in order to read @exit while user is waiting
@@ -303,8 +377,9 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
                 sendMsg("Wait for chat...\n", firstUser -> key.user_sd);
         }
 
-        printf("[%s] cond_wait \n", firstUser -> key.nickname);
+        printf("[%s] cond_wait\n", firstUser -> key.nickname);
         cond_wait('C', room);
+        //strcpy(firstUser -> key.nickname, nickname_current_user);
 
         // if a thread was created then send a signal to kill it
         if(t_kill != 0) pthread_kill(tid, SIGUSR1);
@@ -315,23 +390,25 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
             return firstUser -> key;
         }
 
-        printf("\n[%s] Possibile chat?\n", firstUser -> key.nickname);
+        printf("\n[%s] Possibile chat? (%d, %d)\n", firstUser -> key.nickname, firstUser -> key.user_sd, firstUser -> key.exit);
 
-        mutex_lock('M', room);       
-        people_condition = getSizeTreeByRoom(room) - people_ChattingFunc(room, 0);
-        mutex_unlock('M', room); 
+        mutex_lock('M', room);
+        people_condition = getSizeTreeByRoom(room) - people_ChattingFunc(room, 0); 
+        mutex_unlock('M', room);
     }
+    strcpy(tmp_nick_1, firstUser -> key.nickname);
     mutex_unlock('C', room);
     
     mutex_lock('M', room);
     insertChildrenByRoom(room);
     secondUser = randomNodeRoom(room);
     mutex_unlock('M', room);
-    
-    mutex_lock('S', room);
+
+    mutex_lock('C', room);
     t_kill = 0;
     while(secondUser -> key.state != 'W' ||  firstUser -> key.state != 'W' || secondUser -> key.exit != 0
-		    || (strcmp(secondUser -> key.nickname, firstUser -> key.nickname_partner) == 0)
+		    || ((strcmp(secondUser -> key.nickname, firstUser -> key.nickname_partner) == 0) && 
+                (strcmp(secondUser -> key.nickname_partner, firstUser -> key.nickname) == 0) )
                     || (strcmp(secondUser -> key.nickname, firstUser -> key.nickname) == 0)) {
         while(clientRecalculation(firstUser -> key.room, firstUser, secondUser)) { 
             // create a thread in order to read @exit while user is waiting
@@ -351,14 +428,16 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
             }
             
             printf("[%s] wait for second user \n", firstUser -> key.nickname);
-            cond_wait('S', room);
+            cond_wait('C', room);
 
             // send signal to thread who handle the @exit in order to close it
             if(t_kill != 0) pthread_kill(tid, SIGUSR1);
         
+            strcpy(firstUser -> key.nickname, nickname_current_user);
+
             // check if the user, during the waiting, has write @exit
             if(firstUser -> key.exit == 1){
-                mutex_unlock('S', room);
+                mutex_unlock('C', room);
                 return firstUser -> key;
             }
 
@@ -366,13 +445,11 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
         }
         
         mutex_lock('M', room);
-        insertChildrenByRoom(room);  
-	    secondUser = randomNodeRoom(room);
+        insertChildrenByRoom(room);
+        secondUser = randomNodeRoom(room);
         mutex_unlock('M', room);
     }
-    mutex_unlock('S',room);
-
-    printf("\n[%s] Chat with partner %s\n", firstUser -> key.nickname, secondUser -> key.nickname);
+    strcpy(tmp_nick_2, secondUser -> key.nickname);
 
     /* update info of nodes chosen */
     firstUser -> key.state = 'T';
@@ -387,23 +464,39 @@ struct T_user create_Chat(char room, char nickname_current_user[]){
     secondUser -> key.exit = 0;
     /* end update */
 
-    mutex_lock('C', user.room);
-    mutex_lock('S', user.room);
     people_ChattingFunc(room, 2);
-    mutex_unlock('S', user.room);
     mutex_unlock('C', user.room);
 
     welcomeToTheChat(firstUser, secondUser);
 
-    user = init_chat(firstUser, secondUser);
+    user = init_chat(firstUser -> key, secondUser -> key);
+
+    mutex_lock('M', room);
+    if(strcmp(user.nickname, tmp_nick_1) == 0){
+        firstUser = search_Tree(room, user.nickname);
+        firstUser -> key.state = 'W';
+        firstUser -> key.stop = user.stop;
+        firstUser -> key.exit = user.exit;
+
+        secondUser = search_Tree(room, tmp_nick_2);
+        secondUser -> key.state = 'W';
+    } else{
+        secondUser = search_Tree(room, user.nickname);
+        secondUser -> key.state = 'W';
+        secondUser -> key.stop = user.stop;
+        secondUser -> key.exit = user.exit;
+
+        firstUser = search_Tree(room, tmp_nick_1);
+        firstUser -> key.state = 'W';
+    }
+    mutex_unlock('M', room);
 
     mutex_lock('C', user.room);
-    mutex_lock('S', user.room);
     people_ChattingFunc(room, -2);
     cond_broadcast('C', user.room);
-    cond_broadcast('S', user.room);
-    mutex_unlock('S', user.room);
     mutex_unlock('C', user.room);
+
+    printf("\nFINE CHAT\n\n");
 
     return user;
 }
@@ -430,7 +523,6 @@ static void *exitUser(void *arg){
         *  in order to return their name and delete them from tree */
         firstUser -> key.exit = 1;
         cond_broadcast('C', firstUser -> key.room);
-        cond_broadcast('S', firstUser -> key.room);
     }
 
     pthread_exit(EXIT_SUCCESS);
@@ -462,36 +554,36 @@ static void welcomeToTheChat(Tree *firstUser, Tree *secondUser){
     }
 }
 
-static struct T_user init_chat(Tree *first_User_Node, Tree *second_User_Node){
+static struct T_user init_chat(struct T_user first_User_Node, struct T_user second_User_Node){
     fd_set readfds;
     struct T_user user;              // string eventually return if a user write "exit" in chat
 
     timeout.tv_sec = 9000;
     timeout.tv_usec = 0;
 
-    printf("Chat started between %s and %s\n", first_User_Node -> key.nickname, second_User_Node -> key.nickname);
+    printf("\n*** Chat started between %s and %s ***\n\n", first_User_Node.nickname, second_User_Node.nickname);
     FD_ZERO(&readfds);              // initialize set (empty)
 
     int max_sd;
-    max_sd = (first_User_Node -> key.user_sd > second_User_Node -> key.user_sd) ?
-            first_User_Node -> key.user_sd : second_User_Node -> key.user_sd;    
+    max_sd = (first_User_Node.user_sd > second_User_Node.user_sd) ?
+            first_User_Node.user_sd : second_User_Node.user_sd;    
 
     while(1){
-        FD_SET(first_User_Node -> key.user_sd,  &readfds);  //Insert file descriptor of first user into the set
-        FD_SET(second_User_Node -> key.user_sd, &readfds);  //Insert file descriptor of second user into the set
+        FD_SET(first_User_Node.user_sd,  &readfds);  //Insert file descriptor of first user into the set
+        FD_SET(second_User_Node.user_sd, &readfds);  //Insert file descriptor of second user into the set
 
         if(select(max_sd + 1, &readfds, NULL, NULL, &timeout) < 0){
             perror("select");
             exit(EXIT_FAILURE);
         }
 
-        if (FD_ISSET(first_User_Node -> key.user_sd, &readfds)){
+        if (FD_ISSET(first_User_Node.user_sd, &readfds)){
             user = manage_chat(first_User_Node, second_User_Node);
-        } else if(FD_ISSET(second_User_Node -> key.user_sd, &readfds)){
+        } else if(FD_ISSET(second_User_Node.user_sd, &readfds)){
             user = manage_chat(second_User_Node, first_User_Node);
         } else {
             printf("TIMEOUT\n");
-            return first_User_Node -> key; 
+            return first_User_Node; 
         }
 
         FD_ZERO(&readfds);
@@ -503,47 +595,47 @@ static struct T_user init_chat(Tree *first_User_Node, Tree *second_User_Node){
     }
 }
 
-static struct T_user manage_chat(Tree *from_Client, Tree *to_Client){
+static struct T_user manage_chat(struct T_user from_Client, struct T_user to_Client){
     char read_buffer[MESSAGE_SIZE];
     char write_buffer[MESSAGE_SIZE + NICKNAME_SIZE + 2];
     ssize_t n_read;
    
-    printf ("From %s to %s\n", from_Client -> key.nickname, to_Client -> key.nickname);
+    printf ("From %s to %s\n", from_Client.nickname, to_Client.nickname);
 
     // read from first client
-    if ((n_read = read(from_Client -> key.user_sd, read_buffer, MESSAGE_SIZE)) < 0){
+    if ((n_read = read(from_Client.user_sd, read_buffer, MESSAGE_SIZE)) < 0){
         perror("recv first user");
         exit(EXIT_FAILURE);
     }
     read_buffer[n_read] = '\0';
-    printf("%s 's message: %s\n", from_Client -> key.nickname, read_buffer);
+    printf("%s 's message: %s\n", from_Client.nickname, read_buffer);
 
     if(strcmp(read_buffer, "@user") == 0) {
-        numberUsers(from_Client -> key.user_sd);
+        numberUsers(from_Client.user_sd);
     } else {
         /* write on second client */
-        sprintf(write_buffer, "%s: %s", from_Client -> key.nickname, read_buffer);
-        if((write(to_Client -> key.user_sd, write_buffer, strlen(write_buffer))) != strlen(write_buffer)){
+        sprintf(write_buffer, "%s: %s", from_Client.nickname, read_buffer);
+        if((write(to_Client.user_sd, write_buffer, strlen(write_buffer))) != strlen(write_buffer)){
             perror("send second user");
             exit(EXIT_FAILURE);
         }
     }
    
     if(strcmp(read_buffer, "@exit") == 0){
-	    from_Client -> key.state = 'W';
-        from_Client -> key.exit = 1;
-        from_Client -> key.stop = 0;
-        to_Client -> key.state = 'W';
-        to_Client -> key.exit = 0;
-        to_Client -> key.stop = 0;
+	    from_Client.state = 'W';
+        from_Client.exit = 1;
+        from_Client.stop = 0;
+        to_Client.state = 'W';
+        to_Client.exit = 0;
+        to_Client.stop = 0;
     } else  if(strcmp(read_buffer, "@stop") == 0) {
-        from_Client -> key.state = 'W';
-        from_Client -> key.stop = 1;
-        from_Client -> key.exit = 0;
-	    to_Client -> key.state = 'W';
-        to_Client -> key.exit = 0;
-        to_Client -> key.stop = 0;
+        from_Client.state = 'W';
+        from_Client.stop = 1;
+        from_Client.exit = 0;
+	    to_Client.state = 'W';
+        to_Client.exit = 0;
+        to_Client.stop = 0;
     }
 
-    return from_Client -> key;
+    return from_Client ;
 }

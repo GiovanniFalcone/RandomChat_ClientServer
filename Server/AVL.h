@@ -21,6 +21,7 @@ struct T_user{
     int user_sd;                            /* socket descriptor of current user */
     int stop;                               /* flag used to know if user has write "@stop". 1 if pressed, 0 otherwise */
     int exit;                               /* flag used to know if user has write "@exit". 1 if pressed, 0 otherwise */
+    int counter;
 };
 
 struct tree{

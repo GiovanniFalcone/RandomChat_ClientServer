@@ -7,7 +7,7 @@
 #ifndef NEW_SERVER_CIRCULARBUFFER_H
 #define NEW_SERVER_CIRCULARBUFFER_H
 
-#define QUEUE_SIZE 10                         // Circular buffer size
+#define QUEUE_SIZE 3                         // Circular buffer size
 
 struct queue{
     int front;

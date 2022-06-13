@@ -15,32 +15,32 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
-#include "Mutex.h"
 
+#include "Mutex.h"
 
 int mutex_lock(char tipomutex, char r)
 {
    if (OPZIONE_LOCK=='T') {   // UTILIZZIAMO IL TRYLOCK per evitare situazioni di DEADLOCK
       if (tipomutex=='M')
          switch(r){
-            case '1' :  return pthread_mutex_trylock(&mutex1);
-            case '2' :  return pthread_mutex_trylock(&mutex2);
-            case '3' :  return pthread_mutex_trylock(&mutex3);
-            case '4' :  return pthread_mutex_trylock(&mutex4);
+            case '1' :  return pthread_mutex_lock(&mutex1);
+            case '2' :  return pthread_mutex_lock(&mutex2);
+            case '3' :  return pthread_mutex_lock(&mutex3);
+            case '4' :  return pthread_mutex_lock(&mutex4);
          }
       else if (tipomutex=='C')
          switch(r) {
-            case '1' :  return pthread_mutex_trylock(&chat_mutex_1);
-            case '2' :  return pthread_mutex_trylock(&chat_mutex_2);
-            case '3' :  return pthread_mutex_trylock(&chat_mutex_3);
-            case '4' :  return pthread_mutex_trylock(&chat_mutex_4);
+            case '1' :  return pthread_mutex_lock(&chat_mutex_1);
+            case '2' :  return pthread_mutex_lock(&chat_mutex_2);
+            case '3' :  return pthread_mutex_lock(&chat_mutex_3);
+            case '4' :  return pthread_mutex_lock(&chat_mutex_4);
          }
       else if (tipomutex=='S')
          switch(r)  {
-            case '1' :  return pthread_mutex_trylock(&chat_mutex2_1);
-            case '2' :  return pthread_mutex_trylock(&chat_mutex2_2);
-            case '3' :  return pthread_mutex_trylock(&chat_mutex2_3);
-            case '4' :  return pthread_mutex_trylock(&chat_mutex2_4);
+            case '1' :  return pthread_mutex_lock(&chat_mutex2_1);
+            case '2' :  return pthread_mutex_lock(&chat_mutex2_2);
+            case '3' :  return pthread_mutex_lock(&chat_mutex2_3);
+            case '4' :  return pthread_mutex_lock(&chat_mutex2_4);
          }
       }
 }
